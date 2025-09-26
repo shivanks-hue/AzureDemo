@@ -30,10 +30,8 @@ steps:
       maven | "$(Agent.OS)"
 
 # Step 4: Install Chrome for Selenium tests
-- script: |
-    choco install googlechrome --ignore-checksums -y
-    chrome --version
-  displayName: 'Install Google Chrome (Windows)'
+- script: chrome --version
+  displayName: 'Check Chrome Version'
 
 # Step 5: Build Maven project
 - script: mvn clean compile
