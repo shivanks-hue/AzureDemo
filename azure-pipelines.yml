@@ -1,0 +1,43 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  MAVEN_OPTS: "-Xmx1024m"
+
+steps:
+# Step 1: Checkout code
+- task: Checkout@1
+
+# Step 2: Setup JDK
+- task: JavaToolInstaller@0
+  inputs:
+    versionSpec: '21'
+    jdkArchitecture: 'x64'
+    
+# Step 3: Cache Maven packages for faster builds
+- task: Cache@2
+  inputs:
+    key: 'maven | "$(Agent.OS)" | **/pom.xml'
+    path: ~/.m2/repository
+    restoreKeys: |
+      maven | "$(Agent.OS)"
+
+# Step 4: Build Maven project
+- script: mvn clean compile
+  displayName: 'Maven Clean & Compile'
+
+# Step 5: Run Selenium tests
+- script: mvn test
+  displayName: 'Run Selenium Tests'
+
+# Step 6: Optional - package project
+- script: mvn package
+  displayName: 'Maven Package'
