@@ -31,12 +31,9 @@ steps:
 
 # Step 4: Install Chrome for Selenium tests
 - script: |
-    sudo apt-get update
-    sudo apt-get install -y wget unzip
-    wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-    sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get install -f -y
-    google-chrome --version
-  displayName: 'Install Google Chrome'
+    choco install googlechrome --ignore-checksums -y
+    chrome --version
+  displayName: 'Install Google Chrome (Windows)'
 
 # Step 5: Build Maven project
 - script: mvn clean compile
