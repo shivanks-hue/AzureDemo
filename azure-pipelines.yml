@@ -18,7 +18,8 @@ steps:
 - task: JavaToolInstaller@0
   inputs:
     versionSpec: '21'
-    jdkArchitecture: 'x64'
+    jdkArchitectureOption: 'x64'
+    jdkSourceOption: PreInstalled
 
 # Step 3: Cache Maven packages for faster builds
 - task: Cache@2
