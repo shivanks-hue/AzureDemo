@@ -30,8 +30,9 @@ steps:
       maven | "$(Agent.OS)"
 
 # Step 4: Install Chrome for Selenium tests
-- script: chrome --version
+- script: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe --version"
   displayName: 'Check Chrome Version'
+
 
 # Step 5: Build Maven project
 - script: mvn clean compile
