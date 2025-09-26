@@ -1,27 +1,24 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+# Azure DevOps Pipeline for Java Maven Selenium Project
 
 trigger:
-- main
+  - main
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: 'ubuntu-latest'
 
 variables:
   MAVEN_OPTS: "-Xmx1024m"
 
 steps:
 # Step 1: Checkout code
-- task: Checkout@1
+- checkout: self
 
 # Step 2: Setup JDK
 - task: JavaToolInstaller@0
   inputs:
     versionSpec: '21'
     jdkArchitecture: 'x64'
-    
+
 # Step 3: Cache Maven packages for faster builds
 - task: Cache@2
   inputs:
@@ -30,14 +27,22 @@ steps:
     restoreKeys: |
       maven | "$(Agent.OS)"
 
-# Step 4: Build Maven project
+# Step 4: Install Chrome for Selenium tests
+- script: |
+    sudo apt-get update
+    sudo apt-get install -y wget unzip
+    wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get install -f -y
+  displayName: 'Install Google Chrome'
+
+# Step 5: Build Maven project
 - script: mvn clean compile
   displayName: 'Maven Clean & Compile'
 
-# Step 5: Run Selenium tests
+# Step 6: Run Selenium tests (headless mode recommended)
 - script: mvn test
   displayName: 'Run Selenium Tests'
 
-# Step 6: Optional - package project
+# Step 7: Package project (optional)
 - script: mvn package
   displayName: 'Maven Package'
