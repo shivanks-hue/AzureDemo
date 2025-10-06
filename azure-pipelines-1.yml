@@ -2,7 +2,8 @@ trigger:
   - main
 
 pool:
-  vmImage: 'ubuntu-latest'   # Use Microsoft-hosted agent
+  
+  Default  # Use Microsoft-hosted agent
 
 variables:
   LT_USERNAME: 'shivanks'
