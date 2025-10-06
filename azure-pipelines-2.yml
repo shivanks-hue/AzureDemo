@@ -6,19 +6,35 @@ variables:
   MAVEN_OPTS: "-Xmx1024m"
 steps:
 - checkout: self
-# Step 1: Install JDK 21 using Chocolatey (or skip if already installed)
+
+# Step 1: Ensure Chocolatey is installed
+- powershell: |
+    # Check if Chocolatey is installed
+    if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
+        Write-Host "Chocolatey is not installed. Installing Chocolatey..."
+        Set-ExecutionPolicy Bypass -Scope Process -Force; 
+        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12; 
+        iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+    } else {
+        Write-Host "Chocolatey is already installed."
+    }
+  displayName: 'Ensure Chocolatey is Installed'
+
+# Step 2: Install JDK 21 using Chocolatey (if not installed)
 - powershell: |
     choco install openjdk21 -y
     java -version
   displayName: 'Install JDK 21'
-# Step 2: Cache Maven dependencies
+
+# Step 3: Cache Maven dependencies
 - task: Cache@2
   inputs:
     key: 'maven | "$(Agent.OS)" | **/pom.xml'
     path: '$(USERPROFILE)\.m2\repository'
     restoreKeys: |
       maven | "$(Agent.OS)"
-# Step 3: Install Google Chrome and ChromeDriver using PowerShell (with fallback for ChromeDriver)
+
+# Step 4: Install Google Chrome and ChromeDriver using PowerShell (with fallback for ChromeDriver)
 - powershell: |
     # Detect Chrome path
     $chromePath = "${Env:ProgramFiles}\Google\Chrome\Application\chrome.exe"
@@ -87,12 +103,15 @@ steps:
     # Verify chromedriver version
     & "$(Agent.ToolsDirectory)\chromedriver\chromedriver.exe" --version
   displayName: 'Install Chrome and ChromeDriver'
-# Step 4: Build Maven project
+
+# Step 5: Build Maven project
 - script: mvn clean compile
   displayName: 'Maven Clean & Compile'
-# Step 5: Run Selenium tests (headless mode recommended)
+
+# Step 6: Run Selenium tests (headless mode recommended)
 - script: mvn test
   displayName: 'Run Selenium Tests'
-# Step 6: Package project (optional)
+
+# Step 7: Package project (optional)
 - script: mvn package
   displayName: 'Maven Package'
