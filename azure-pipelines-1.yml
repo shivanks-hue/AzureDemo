@@ -34,7 +34,7 @@ stages:
 
       # 3️⃣ Run TestNG suite
       - script: |
-          mvn test -DsuiteXmlFile=single.xml
+          mvn clean test 
         displayName: "Run TestNG Suite"
 
       # 4️⃣ Publish LambdaTest results
