@@ -8,9 +8,14 @@ steps:
 - checkout: self
 # Step 1: Install JDK 21 using Chocolatey (or skip if already installed)
 - powershell: |
-    choco install openjdk21 -y
-    java -version
-  displayName: 'Install JDK 21'
+    if (-Not (Test-Path "C:\ProgramData\chocolatey\bin\choco.exe")) {
+        Set-ExecutionPolicy Bypass -Scope Process -Force; 
+        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12; 
+        iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+    }
+    # Ensure chocolatey is installed
+    choco --version
+  displayName: 'Install Chocolatey'
 # Step 2: Cache Maven dependencies
 - task: Cache@2
   inputs:
