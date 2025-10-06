@@ -12,15 +12,9 @@ steps:
         Set-ExecutionPolicy Bypass -Scope Process -Force; 
         [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12; 
         iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-        refreshenv
     }
-    # Ensure chocolatey is installed, and check the version if possible
-    if (Get-Command choco -ErrorAction SilentlyContinue) {
-        choco --version
-    } else {
-        Write-Error "Chocolatey installation failed."
-        exit 1
-    }
+    # Ensure chocolatey is installed
+    choco --version
   displayName: 'Install Chocolatey'
 
 # Step 2: Cache Maven dependencies
@@ -30,6 +24,7 @@ steps:
     path: '$(USERPROFILE)\.m2\repository'
     restoreKeys: |
       maven | "$(Agent.OS)"
+
 # Step 3: Install Google Chrome and ChromeDriver using PowerShell (with fallback for ChromeDriver)
 - powershell: |
     # Detect Chrome path
@@ -99,12 +94,15 @@ steps:
     # Verify chromedriver version
     & "$(Agent.ToolsDirectory)\chromedriver\chromedriver.exe" --version
   displayName: 'Install Chrome and ChromeDriver'
+
 # Step 4: Build Maven project
 - script: mvn clean compile
   displayName: 'Maven Clean & Compile'
+
 # Step 5: Run Selenium tests (headless mode recommended)
 - script: mvn test
   displayName: 'Run Selenium Tests'
+
 # Step 6: Package project (optional)
 - script: mvn package
   displayName: 'Maven Package'
