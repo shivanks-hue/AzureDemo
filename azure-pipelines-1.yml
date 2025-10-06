@@ -1,0 +1,31 @@
+trigger:
+- main
+pool:
+  MylocalPool
+  #vmImage: ubuntu-latest
+  #MylocalPool
+variables:
+  LT_USERNAME: 'shivanks'
+  LT_ACCESS_KEY: 'LT_V6UEGtFRGiIPH4QcUdNKQv4RIetJjVfXKKIEkrP3Sk15opJ'
+  LT_BUILD_NAME: 'Azure_testng_demo'
+stages:
+- stage: BuildAndTest
+  jobs:
+  - job: BuildAndTestJob
+    steps:
+      - task: configuration@1
+        inputs:
+            connection: ankit-LT-connection
+            #isTunnelActivate: true
+            #tunnelOptions: '{"tunnelName": "ABC"}'
+      - script: |
+          mvn clean install -DskipTests
+      - script: "mvn test -D suite=single.xml"
+        displayName: "Command Line Script"
+      - task: LambdatestResults@1
+# - stage: LambdatestResults
+#   jobs:
+#   - job: LambdatestResultsJob
+#     steps:
+#       - script: |
+#           echo "Hello"
