@@ -1,31 +1,45 @@
 trigger:
-- main
+  - main
+
 pool:
-  MylocalPool
-  #vmImage: ubuntu-latest
-  #MylocalPool
+  vmImage: 'ubuntu-latest'   # Use Microsoft-hosted agent
+
 variables:
   LT_USERNAME: 'shivanks'
   LT_ACCESS_KEY: 'LT_V6UEGtFRGiIPH4QcUdNKQv4RIetJjVfXKKIEkrP3Sk15opJ'
   LT_BUILD_NAME: 'Azure_testng_demo'
+
 stages:
 - stage: BuildAndTest
+  displayName: "Build and Run Tests on LambdaTest"
   jobs:
   - job: BuildAndTestJob
+    displayName: "Build & Test Job"
     steps:
+
+      # 1️⃣ Configure LambdaTest connection
       - task: configuration@1
+        displayName: "Configure LambdaTest Connection"
         inputs:
-            connection: ankit-LT-connection
-            #isTunnelActivate: true
-            #tunnelOptions: '{"tunnelName": "ABC"}'
+          connection: ankit-LT-connection
+          # Uncomment if you need a tunnel
+          # isTunnelActivate: true
+          # tunnelOptions: '{"tunnelName": "MyTunnel"}'
+
+      # 2️⃣ Build Maven project (skip tests)
       - script: |
           mvn clean install -DskipTests
-      - script: "mvn test -D suite=single.xml"
-        displayName: "Command Line Script"
+        displayName: "Maven Build"
+
+      # 3️⃣ Run TestNG suite
+      - script: |
+          mvn test -DsuiteXmlFile=single.xml
+        displayName: "Run TestNG Suite"
+
+      # 4️⃣ Publish LambdaTest results
       - task: LambdatestResults@1
-# - stage: LambdatestResults
-#   jobs:
-#   - job: LambdatestResultsJob
-#     steps:
-#       - script: |
-#           echo "Hello"
+        displayName: "Publish LambdaTest Results"
+        inputs:
+          buildName: '$(LT_BUILD_NAME)'
+          username: '$(LT_USERNAME)'
+          accessKey: '$(LT_ACCESS_KEY)'
