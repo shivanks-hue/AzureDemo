@@ -29,7 +29,7 @@ stages:
 
       # 2️⃣ Build Maven project (skip tests)
       - script: |
-          mvn clean install -DskipTests
+          mvn clean install 
         displayName: "Maven Build"
 
       # 3️⃣ Run TestNG suite
