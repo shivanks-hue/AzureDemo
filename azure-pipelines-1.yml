@@ -12,10 +12,17 @@ steps:
         Set-ExecutionPolicy Bypass -Scope Process -Force; 
         [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12; 
         iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+        refreshenv
     }
-    # Ensure chocolatey is installed
-    choco --version
+    # Ensure chocolatey is installed, and check the version if possible
+    if (Get-Command choco -ErrorAction SilentlyContinue) {
+        choco --version
+    } else {
+        Write-Error "Chocolatey installation failed."
+        exit 1
+    }
   displayName: 'Install Chocolatey'
+
 # Step 2: Cache Maven dependencies
 - task: Cache@2
   inputs:
