@@ -1,46 +1,36 @@
+# Azure DevOps Pipeline for Java Maven Selenium Project
 trigger:
   - main
-
 pool:
-  
-  Default  # Use Microsoft-hosted agent
-
+  # vmImage: 'ubuntu-latest'   # Use hosted agent. If self-hosted, change to: name: 'Default'
+  Default
 variables:
-  LT_USERNAME: 'shivanks'
-  LT_ACCESS_KEY: 'LT_V6UEGtFRGiIPH4QcUdNKQv4RIetJjVfXKKIEkrP3Sk15opJ'
-  LT_BUILD_NAME: 'Azure_testng_demo'
-
-stages:
-- stage: BuildAndTest
-  displayName: "Build and Run Tests on LambdaTest"
-  jobs:
-  - job: BuildAndTestJob
-    displayName: "Build & Test Job"
-    steps:
-
-      # 1️⃣ Configure LambdaTest connection
-      - task: configuration@1
-        displayName: "Configure LambdaTest Connection"
-        inputs:
-          connection: ankit-LT-connection
-          # Uncomment if you need a tunnel
-          # isTunnelActivate: true
-          # tunnelOptions: '{"tunnelName": "MyTunnel"}'
-
-      # 2️⃣ Build Maven project (skip tests)
-      - script: |
-          mvn clean install 
-        displayName: "Maven Build"
-
-      # 3️⃣ Run TestNG suite
-      - script: |
-          mvn clean test 
-        displayName: "Run TestNG Suite"
-
-      # 4️⃣ Publish LambdaTest results
-      - task: LambdatestResults@1
-        displayName: "Publish LambdaTest Results"
-        inputs:
-          buildName: '$(LT_BUILD_NAME)'
-          username: '$(LT_USERNAME)'
-          accessKey: '$(LT_ACCESS_KEY)'
+  MAVEN_OPTS: "-Xmx1024m"
+steps:
+# Step 1: Checkout code
+- checkout: self
+# Step 2: Install JDK 21 (manual install)
+- script: |
+    sudo apt-get update
+    sudo apt-get install -y openjdk-21-jdk
+    java -version
+  displayName: 'Install JDK 21'
+# Step 3: Cache Maven packages for faster builds
+- task: Cache@2
+  inputs:
+    key: 'maven | "$(Agent.OS)" | **/pom.xml'
+    path: '$(USERPROFILE)\.m2\repository'
+    restoreKeys: |
+      maven | "$(Agent.OS)"
+# Step 4: Install Chrome for Selenium tests
+- script: '"C:\Program Files\Google\Chrome\Application\chrome.exe" --version'
+  displayName: 'Check Chrome Version'
+# Step 5: Build Maven project
+- script: mvn clean compile
+  displayName: 'Maven Clean & Compile'
+# Step 6: Run Selenium tests (headless mode recommended)
+- script: mvn test
+  displayName: 'Run Selenium Tests'
+# Step 7: Package project (optional)
+- script: mvn package
+  displayName: 'Maven Package'
